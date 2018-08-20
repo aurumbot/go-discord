@@ -15,17 +15,22 @@ func init() {
 		Help:   "Goes through all of the server's roles and posts them and their IDs.",
 		Action: getRoles,
 	}
-	/*	Commands["getperms"] = &f.Command{
-				Name: "Get permission for users",
-				Help: `Gets the value of permission integer for users in each of the server's channels.
+	Commands["getemail"] = &f.Command{
+		Name:   "Get User's Email",
+		Help:   "Gets the email of mentioned users",
+		Action: getEmail,
+	}
+	Commands["getperms"] = &f.Command{
+		Name: "Get permission for users",
+		Help: `Gets the value of permission integer for users in each of the server's channels.
 		The permissions are set as 53-bit integers calculated using bitwise operations.
 		For more info see https://discordapp.com/developers/docs/topics/permissions and
 		https://discordapi.com/permissions.html.
 		User mentions should be passed as arguments. Multiple users at a time are supported.
 
 		Usage: getperms @someuser @otheruser`,
-				Action: getPerms,
-			}*/
+		Action: getPerms,
+	}
 }
 
 /* # Get server roles
@@ -43,6 +48,19 @@ func getRoles(session *dsg.Session, message *dsg.MessageCreate) {
 	s := session
 	m := message.Message
 
+	// Performs permission check
+	perm, err := f.HasPermissions(s, m.Message, m.Author.ID, dsg.PermissionManageServer)
+	if err != nil {
+		dat.Log.Println(err)
+		dat.AlertDiscord(s, m, err)
+		return
+	}
+	if !perm {
+		s.ChannelMessageSend(m.ChannelID, "Sorry, you do not have permission to use this command.")
+		return
+	}
+
+	// Retrieves roles, puts them into a slice
 	guild, err := f.GetGuild(f.DG, m)
 	if err != nil {
 		dat.Log.Println(err.Error())
@@ -53,18 +71,48 @@ func getRoles(session *dsg.Session, message *dsg.MessageCreate) {
 		dat.Log.Println(err.Error())
 		return
 	}
-	roleMSG := "Server role list:\n```\n"
-	for _, r := range roles {
-		roleMSG += "Name: " + r.Name + "; ID: " + r.ID + ";\n"
+
+	// Sends out the info, this is complex in case the character count is
+	// over 2000, which won't send.
+	rolemsg := "Role list for server:\n```\n"
+	multimsg := false //in case message trails over the 2k char limit
+	for _, role := range roles {
+		if multimsg {
+			rolemsg = "```\n"
+			multimsg = false
+		}
+		rolemsg += "Role: " + role.Name + ", ID: " + channel.ID + "\n"
+
+		if len(rolemsg) > 1900 {
+			rolemsg += "```"
+			s.ChannelMessageSend(m.ChannelID, rolemsg)
+			rolemsg = ""
+			multimsg = true
+		}
 	}
-	roleMSG += "```"
-	s.ChannelMessageSend(m.ChannelID, roleMSG)
+	if len(rolemsg) > 0 {
+		rolemsg += "```"
+		s.ChannelMessageSend(m.ChannelID, rolemsg)
+	}
 }
 
-/*func getPerms(session *dsg.Session, message *dsg.MessageCreate) {
+func getPerms(session *dsg.Session, message *dsg.MessageCreate) {
 	s := session
 	m := message.Message
 
+	// Performs permission check
+	perm, err := f.HasPermissions(s, m.Message, m.Author.ID, dsg.PermissionManageServer)
+	if err != nil {
+		dat.Log.Println(err)
+		dat.AlertDiscord(s, m, err)
+		return
+	}
+	if !perm {
+		s.ChannelMessageSend(m.ChannelID, "Sorry, you do not have permission to use this command.")
+		return
+	}
+
+	// Fetches guild info
 	guild, err := f.GetGuild(s, m)
 	if err != nil {
 		dat.Log.Println(err.Error())
@@ -106,4 +154,4 @@ func getRoles(session *dsg.Session, message *dsg.MessageCreate) {
 		}
 		s.ChannelMessageSend(m.ChannelID, permsMSG)
 	}
-}*/
+}

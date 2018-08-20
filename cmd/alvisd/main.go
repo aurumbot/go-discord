@@ -120,7 +120,6 @@ func main() {
 
 func runBot() {
 	bot, err := dat.GetBotInfo()
-	fmt.Println(c.B0 + "Reading bot prefrences file...")
 	dat.Log.Println("Reading bot prefs file...")
 	if err != nil {
 		dat.Log.Fatalln(err.Error())

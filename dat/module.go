@@ -25,8 +25,8 @@ var path string
 func init() {
 	ps = OSCheck()
 
-	path = "." + ps
-	//path = "/home/whitman-colm/bots/pyra/"
+	//path = "." + ps
+	path = "/home/whitman-colm/bots/bastard/"
 
 	currentTime = time.Now().Format("2006-01-02@15h04m")
 
