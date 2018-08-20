@@ -59,12 +59,25 @@ type Action func(session *dsg.Session, message *dsg.MessageCreate)
 
 /* Defines static data about commands the bot runs.
 * This is a very large structure that defines all the needed bits for a bot
-* command. All bot modules MUST have one of these along with a few outher key
+* command. All bot modules MUST have one of these along with a few other key
 * components so that the bot works.
+*
+* Parameters:
+* - Name (string)   | The name of the command, used in the help page
+* - Help (string)   | A description of the command and how it is used.
+* - Action (Action) | The function the command runs
+* - Perms (Int)     | Oh boy this is a doozie:
+* This is the integer value of the permissions needed to run the command. If
+* you don't know what value to use, use a calculator tool such as
+* https://discordapi.com/permissions.html or discordgo's predefined constants
+* available at https://godoc.org/github.com/bwmarrin/discordgo#pkg-constants
+* If you want your command available to all users who can trigger the bot, set
+* this value to -1.
  */
 type Command struct {
 	Name   string `json:"name"`
 	Help   string `json:"help"`
+	Perms  int    `json:"perms"`
 	Action Action `json:"-"`
 }
 

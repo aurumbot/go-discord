@@ -36,13 +36,13 @@ Usage : ` + f.MyBot.Prefs.Prefix + `help <command>`,
 	for key, value := range info.Commands {
 		Cmd[key] = value
 	}
-	for key, value := range util.Commands {
+	for key, value := range utils.Commands {
 		Cmd[key] = value
 	}
-	for key, value := range mods.Commands {
+	for key, value := range moderation.Commands {
 		Cmd[key] = value
 	}
-	//for key, value := range IMPORTNAMEHERE.Commands {
+	//for key, value := range PACKAGENAME.Commands {
 	//        Cmd[key] = value
 	//}
 }
@@ -79,7 +79,7 @@ func MessageCreate(s *dsg.Session, m *dsg.MessageCreate) {
 		dat.AlertDiscord(s, m, err)
 		return
 	}
-	if canRunCommand != true {
+	if !canRunCommand {
 		return
 	}
 
@@ -91,6 +91,8 @@ func MessageCreate(s *dsg.Session, m *dsg.MessageCreate) {
 	if strings.HasPrefix(m.Content, f.MyBot.Prefs.Prefix) {
 		msg = strings.SplitAfterN(messageSanatized, f.MyBot.Prefs.Prefix, 2)
 		m.Content = msg[1]
+		//TODO: Check if there is a way to use a mention() method of discordgo rather than
+		//this string frankenstein
 	} else if strings.HasPrefix(m.Content, "<@!"+f.MyBot.Auth.ClientID+">") {
 		msg = strings.SplitAfterN(messageSanatized, "<@!"+f.MyBot.Auth.ClientID+">", 2)
 		m.Content = strings.TrimSpace(msg[1])
@@ -104,20 +106,31 @@ func MessageCreate(s *dsg.Session, m *dsg.MessageCreate) {
 	message := strings.Split(m.Content, " ")
 
 	// Now the message is run to see if its a valid command and acted upon.
-	didAThing := false
 	for command, action := range Cmd {
 		if message[0] == command {
+			if action.Perms != -1 {
+				perm, err := f.HasPermissions(s, m.Message, m.Author.ID, action.Perms)
+				if err != nil {
+					dat.Log.Println(err)
+					dat.AlertDiscord(s, m, err)
+					return
+				}
+				if !perm {
+					s.ChannelMessageSend(m.ChannelID, "Sorry, you do not have permission to use this command.")
+					return
+				}
+			}
 			action.Action(s, m)
-			didAThing = true
+			return
 		}
 	}
-	if didAThing == false {
-		if strings.Contains(m.Message.Content, "@") {
-			s.ChannelMessageSend(m.ChannelID, "Sorry <@"+m.Message.Author.ID+">, but I don't understand what you're saying.")
-		} else {
-			s.ChannelMessageSend(m.ChannelID, "Sorry <@"+m.Message.Author.ID+">, but I don't know what you mean by \"`"+m.Message.Content+"`\".")
-		}
+
+	if strings.Contains(m.Message.Content, "@") {
+		s.ChannelMessageSend(m.ChannelID, "Sorry <@"+m.Message.Author.ID+">, but I don't understand.")
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Sorry <@"+m.Message.Author.ID+">, but I don't understand what you mean by \"`"+m.Message.Content+"`\".")
 	}
+
 }
 
 /* # Check if user can run command
