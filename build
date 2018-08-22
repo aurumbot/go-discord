@@ -1,10 +1,10 @@
 #!/bin/sh
 
-echo "Building for Windows ..."
+echo "\033[1;33mBuilding for Windows ...\033[0m"
 GOOS=windows go build -o bin/windows/bot.exe cmd/alvisd/main.go
 
-echo "Building for Mac (darwin) ..."
+echo "\033[1;33mBuilding for Mac (darwin) ...\033[0m"
 GOOS=darwin go build -o bin/macos/bot cmd/alvisd/main.go
 
-echo "Building for Linux ..."
+echo "\033[1;33mBuilding for Linux ...\033[0m"
 env GOOS=linux GOARCH=386 CGO_ENABLED=0 go build -o bin/linux/bot cmd/alvisd/main.go

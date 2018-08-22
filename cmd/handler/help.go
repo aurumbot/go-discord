@@ -18,7 +18,7 @@ Flags:
 Usage : ` + f.MyBot.Prefs.Prefix + `help -c <command>
 	` + f.MyBot.Prefs.Prefix + `help -ls`,
 		Perms:   -1,
-		Version: "v2.0β",
+		Version: "v2.0.1β",
 		Action:  help,
 	}
 }
@@ -45,49 +45,46 @@ func help(session *dsg.Session, message *dsg.MessageCreate) {
 	flagsParsed := flags.Parse(msg)
 
 	// These are some cop-out variables so I don't nest to eternity.
-	var (
-		cmd  *flags.Flag
-		list bool
-	)
-
-	//dm := false
+	if len(flagsParsed) == 0 {
+		h := "Help Page Found:\n```" + Cmd["help"].Name + "\n" + Cmd["help"].Help + "```"
+		session.ChannelMessageSend(message.ChannelID, h)
+		return
+	}
 
 	for i := range flagsParsed {
 		if flagsParsed[i].Type == flags.Dash && flagsParsed[i].Name == "c" {
-			list = false
-			cmd = flagsParsed[i]
+			session.ChannelMessageSend(message.ChannelID, search(flagsParsed[i]))
 		} else if flagsParsed[i].Type == flags.Dash && flagsParsed[i].Name == "ls" {
-			list = true
+			session.ChannelMessageSend(message.ChannelID, list(session, message))
 		} else if flagsParsed[i].Type == flags.DoubleDash && flagsParsed[i].Name == "command" {
-			list = false
-			cmd = flagsParsed[i]
+			session.ChannelMessageSend(message.ChannelID, search(flagsParsed[i]))
 		}
 	}
+}
 
-	if !list {
-		for command, action := range Cmd {
-			if cmd.Value == command {
-				help := "Help Page Found:\n```" + action.Name + "\n" + action.Help + "```"
-				session.ChannelMessageSend(message.ChannelID, help)
-				return
-			}
+func list(session *dsg.Session, message *dsg.MessageCreate) string {
+	msg := "**Available Commands:**"
+	for command, action := range Cmd {
+		u, err := f.HasPermissions(session, message.Message, message.Author.ID, action.Perms)
+		if err != nil {
+			dat.Log.Println(err)
+			dat.AlertDiscord(session, message, err)
+			return ""
 		}
-		session.ChannelMessageSend(message.ChannelID, "Sorry, but I couldn't find a help page for that command.")
-		return
-	} else {
-		msg := "**Available Commands:**"
-		for command, action := range Cmd {
-			u, err := f.HasPermissions(session, message.Message, message.Author.ID, action.Perms)
-			if err != nil {
-				dat.Log.Println(err)
-				dat.AlertDiscord(session, message, err)
-				return
-			}
-			if u {
-				msg += "\n" + f.MyBot.Prefs.Prefix + command + " : " + action.Name
-			}
+		if u {
+			msg += "\n" + f.MyBot.Prefs.Prefix + command + " : " + action.Name
 		}
-		msg += "\nUse `" + f.MyBot.Prefs.Prefix + "help -c <command>` to get more info on a command"
-		session.ChannelMessageSend(message.ChannelID, msg)
 	}
+	msg += "\nUse `" + f.MyBot.Prefs.Prefix + "help -c <command>` to get more info on a command"
+	return msg
+}
+
+func search(cmd *flags.Flag) string {
+	for command, action := range Cmd {
+		if cmd.Value == command {
+			help := "Help Page Found:\n**" + action.Name + "**\n```" + action.Help + "\nVersion: " + action.Version + "```"
+			return help
+		}
+	}
+	return "Sorry, but I couldn't find a help page for that command."
 }
