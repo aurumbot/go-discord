@@ -4,8 +4,17 @@ import (
 	dsg "github.com/bwmarrin/discordgo"
 	f "github.com/whitman-colm/go-discord"
 	"github.com/whitman-colm/go-discord/dat"
-	"strconv"
 )
+
+func init() {
+	Commands["getroles"] = &f.Command{
+		Name:    "Get Server Roles",
+		Help:    "Goes through all of the server's roles and posts them and their IDs.",
+		Perms:   dsg.PermissionManageChannels,
+		Version: "v1.0",
+		Action:  getRoles,
+	}
+}
 
 /* # Get server roles
 * A g-d impossibility.
@@ -21,18 +30,6 @@ import (
 func getRoles(session *dsg.Session, message *dsg.MessageCreate) {
 	s := session
 	m := message.Message
-
-	// Performs permission check
-	perm, err := f.HasPermissions(s, m.Message, m.Author.ID, dsg.PermissionManageServer)
-	if err != nil {
-		dat.Log.Println(err)
-		dat.AlertDiscord(s, m, err)
-		return
-	}
-	if !perm {
-		s.ChannelMessageSend(m.ChannelID, "Sorry, you do not have permission to use this command.")
-		return
-	}
 
 	// Retrieves roles, puts them into a slice
 	guild, err := f.GetGuild(f.DG, m)
@@ -55,7 +52,7 @@ func getRoles(session *dsg.Session, message *dsg.MessageCreate) {
 			rolemsg = "```\n"
 			multimsg = false
 		}
-		rolemsg += "Role: " + role.Name + ", ID: " + channel.ID + "\n"
+		rolemsg += "Role: " + role.Name + ", ID: " + role.ID + "\n"
 
 		if len(rolemsg) > 1900 {
 			rolemsg += "```"

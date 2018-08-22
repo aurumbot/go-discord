@@ -1,9 +1,9 @@
-package mods
+package moderation
 
 import (
 	dsg "github.com/bwmarrin/discordgo"
 	f "github.com/whitman-colm/go-discord"
-	"github.com/whitman-colm/go-discord/dat"
+	//"github.com/whitman-colm/go-discord/dat"
 	"github.com/whitman-colm/go-discord/flags"
 	"strings"
 	"time"
@@ -18,24 +18,15 @@ The warn will be placed on any users tagged.
 The warn will be considered "decayed" after 24 hours.
 The actor must have the PermissionKickMembers perm to run this command.
 Usage: mute @user --reason please do not post spoilers in this channel`,
-		Action: warnUser,
+		Perms:   dsg.PermissionKickMembers,
+		Version: "v1.0α",
+		Action:  warnUser,
 	}
 }
 
 func warnUser(session *dsg.Session, message *dsg.MessageCreate) {
 	s := session
 	m := message
-
-	perm, err := f.HasPermissions(s, m.Message, m.Author.ID, dsg.PermissionKickMembers)
-	if err != nil {
-		dat.Log.Println(err)
-		dat.AlertDiscord(s, m, err)
-		return
-	}
-	if !perm {
-		s.ChannelMessageSend(m.ChannelID, "Sorry, you do not have permission to use this command.")
-		return
-	}
 
 	var (
 		reason string

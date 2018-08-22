@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	dsg "github.com/bwmarrin/discordgo"
-	c "github.com/skilstak/go-colors"
 	"github.com/takama/daemon"
 	f "github.com/whitman-colm/go-discord"
 	"github.com/whitman-colm/go-discord/cmd/handler"

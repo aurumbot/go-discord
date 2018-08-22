@@ -4,50 +4,9 @@ import (
 	"errors"
 	dsg "github.com/bwmarrin/discordgo"
 	f "github.com/whitman-colm/go-discord"
-	"github.com/whitman-colm/go-discord/cmd/commands/info"
-	"github.com/whitman-colm/go-discord/cmd/commands/moderation"
-	"github.com/whitman-colm/go-discord/cmd/commands/ping"
-	"github.com/whitman-colm/go-discord/cmd/commands/utils"
 	"github.com/whitman-colm/go-discord/dat"
 	"strings"
 )
-
-var Cmd = map[string]*f.Command{}
-
-/* FOR THE PERSON RUNNING THIS BOT: Adding packages to the command list
-* As of now, the bot has no commands set to it so while it may boot up, it
-* won't actually do anything. You will need to add the maps of the command
-* modules you have imported or made into the main Cmd map. To do this, add
-* each of the command's public map[string]*f.Command type into the following
-* init statment. 2 commands, `info` and `ping` have already been added to help
-* show what you need to do:
- */
-
-func init() {
-	Cmd["help"] = &f.Command{
-		Name: "Command Help Page Search",
-		Help: `Info  : The built-in helper to get information about all of the bots commands
-Usage : ` + f.MyBot.Prefs.Prefix + `help <command>`,
-		Action: help,
-	}
-	for key, value := range ping.Commands {
-		Cmd[key] = value
-	}
-	for key, value := range info.Commands {
-		Cmd[key] = value
-	}
-	for key, value := range utils.Commands {
-		Cmd[key] = value
-	}
-	for key, value := range moderation.Commands {
-		Cmd[key] = value
-	}
-	//for key, value := range PACKAGENAME.Commands {
-	//        Cmd[key] = value
-	//}
-}
-
-//----------------------------------------------------------------------------------//
 
 /* # MessageCreate
 * The world's bigest switch statment
@@ -148,7 +107,7 @@ func MessageCreate(s *dsg.Session, m *dsg.MessageCreate) {
 *
 * NOTE: IF THESE CONDITIONS ARE MET THEN NO ERROR WILL BE SENT TO EITHER DISCORD OR LOGGED.
 * THIS IS BY DESIGN. DON'T CHANGE IT THINKING I WAS JUST LAZY.
- */
+ *
 func canTriggerBot(s *dsg.Session, m *dsg.Message) (bool, error) {
 	if m.Author.Bot {
 		return false, nil
@@ -189,75 +148,4 @@ func canTriggerBot(s *dsg.Session, m *dsg.Message) (bool, error) {
 	}
 	return true, nil
 }
-
-/* # Get server roles
-* A g-d impossibility.
-*
-* Parameters:
-* - m (type *discordgo.Message) | The message used for data extraction about
-*	the guild and its roles.
-*
-* Returns:
-* - (type string) | A string list of all the roles.
-* - (type error)  | Any errors that may have come up.
-*
-* NOTE: If you print this into a discord chat, it WILL mention @everyone
- */
-func getRoles(m *dsg.Message) (string, error) {
-	guild, err := f.GetGuild(f.DG, m)
-	if err != nil {
-		return "", err
-	}
-	roles, err := f.DG.GuildRoles(guild.ID)
-	if err != nil {
-		return "", err
-	}
-	role := "Server role list:\n```\n"
-	for _, r := range roles {
-		role += "Name: " + r.Name + "; ID: " + r.ID + ";\n"
-	}
-	role += "```"
-	return role, nil
-}
-
-/* # Get bot help
-* Overcomplecated for little good reason
-*
-* Parameters:
-* - s (type *discordgo.Session) The discord session, this function will manage
-*	responding to users instead of a message handler.
-* - m (type *discordgo.Session) The message (or a sanitized version of the
-*	message) to be used if needed by certain options.
-* - f (type []*flagParser.Flag) All the flags and modifiers used with the
-*	command.
-*
-* Note that this function handles responding instead of returning a value to
-* its parent to be sent out.
-*
-* Flags:
-* -d | Sends the result via dm.
-* -t | Sends the result as standard text (opposed to an embed)
-* --command $COMMAND | gets help for the $COMMAND
-*
-* TODO: Make the help not hard coded. Move into json file? Massive refactor for
-* v5.0-alpha probably.
- */
-func help(session *dsg.Session, message *dsg.MessageCreate) {
-	msg := strings.Split(message.Content, " ")
-	didAThing := false
-	if len(msg) <= 1 {
-		h := "Help Page Found:\n```" + Cmd["help"].Name + "\n" + Cmd["help"].Help + "```"
-		session.ChannelMessageSend(message.ChannelID, h)
-		return
-	}
-	for command, action := range Cmd {
-		if msg[1] == command {
-			help := "Help Page Found:\n```" + action.Name + "\n" + action.Help + "```"
-			session.ChannelMessageSend(message.ChannelID, help)
-			didAThing = true
-		}
-	}
-	if !didAThing {
-		session.ChannelMessageSend(message.ChannelID, "Sorry, but I couldn't find a help page for that command.")
-	}
-}
+*/

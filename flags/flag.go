@@ -1,6 +1,9 @@
 package flags
 
-import "github.com/whitman-colm/go-discord/dat"
+import (
+	"github.com/whitman-colm/go-discord/dat"
+	"strings"
+)
 
 type Type string
 
@@ -57,5 +60,10 @@ func Parse(args []string) []*Flag {
 			dat.Log.Println("System recived flag that was not valid: \"" + arg + "\" .")
 		}
 	}
+	// removes whitespace from flag values
+	for f := range flags {
+		flags[f].Value = strings.Trim(flags[f].Value, " ")
+	}
+
 	return flags
 }

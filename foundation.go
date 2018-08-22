@@ -75,10 +75,11 @@ type Action func(session *dsg.Session, message *dsg.MessageCreate)
 * this value to -1.
  */
 type Command struct {
-	Name   string `json:"name"`
-	Help   string `json:"help"`
-	Perms  int    `json:"perms"`
-	Action Action `json:"-"`
+	Name    string `json:"name"`
+	Help    string `json:"help"`
+	Perms   int    `json:"perms"`
+	Version string `json:"version"`
+	Action  Action `json:"-"`
 }
 
 /* # Get the guild a message was sent in.

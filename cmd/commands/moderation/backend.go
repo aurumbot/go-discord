@@ -1,4 +1,4 @@
-package mods
+package moderation
 
 import (
 	f "github.com/whitman-colm/go-discord"

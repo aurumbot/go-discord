@@ -33,7 +33,9 @@ func init() {
 	 -m : Get info via direct message
 	 -c : Post info in channel
 Github  : https://github.com/whitman-colm/discord-public/cmd/commands/info`,
-		Action: info,
+		Perms:   -1,
+		Version: "v1.0",
+		Action:  info,
 	}
 }
 
