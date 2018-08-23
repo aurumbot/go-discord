@@ -6,6 +6,7 @@ import (
 	"github.com/whitman-colm/go-discord/dat"
 	"github.com/whitman-colm/go-discord/flags"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -63,6 +64,7 @@ func help(session *dsg.Session, message *dsg.MessageCreate) {
 }
 
 func list(session *dsg.Session, message *dsg.MessageCreate) string {
+	t1 := time.Now()
 	msg := "**Available Commands:**"
 	for command, action := range Cmd {
 		u, err := f.HasPermissions(session, message.Message, message.Author.ID, action.Perms)
@@ -75,7 +77,9 @@ func list(session *dsg.Session, message *dsg.MessageCreate) string {
 			msg += "\n" + f.MyBot.Prefs.Prefix + command + " : " + action.Name
 		}
 	}
-	msg += "\nUse `" + f.MyBot.Prefs.Prefix + "help -c <command>` to get more info on a command"
+	t2 := time.Since(t1)
+	tStr := t2.String()
+	msg += "\nUse `" + f.MyBot.Prefs.Prefix + "help -c <command>` to get more info on a command (" + tStr + ")"
 	return msg
 }
 

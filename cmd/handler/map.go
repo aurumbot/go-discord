@@ -2,6 +2,7 @@ package cmd
 
 import (
 	f "github.com/whitman-colm/go-discord"
+	"github.com/whitman-colm/go-discord-customcmds/minecraft"
 	"github.com/whitman-colm/go-discord-customcmds/rolepicker"
 	"github.com/whitman-colm/go-discord/cmd/commands/info"
 	"github.com/whitman-colm/go-discord/cmd/commands/moderation"
@@ -34,6 +35,9 @@ func init() {
 		Cmd[key] = value
 	}
 	for key, value := range rolepicker.Commands {
+		Cmd[key] = value
+	}
+	for key, value := range minecraft.Commands {
 		Cmd[key] = value
 	}
 	//for key, value := range PACKAGENAME.Commands {
