@@ -3,6 +3,7 @@ package dat
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/boltdb/bolt"
 	dsg "github.com/bwmarrin/discordgo"
 	f "github.com/whitman-colm/go-discord"
 	"io"
@@ -24,7 +25,6 @@ var path string
 
 func init() {
 	ps = OSCheck()
-
 	//path = "." + ps
 	path = "/home/whitman-colm/bots/bastard/"
 
@@ -84,6 +84,7 @@ func Load(fileName string, v interface{}) error {
 	return err
 }
 
+// TODO: delete, rewrite main to pull from a Load() call.
 func GetBotInfo() (f.BotType, error) {
 	raw, err := ioutil.ReadFile(path + "config" + ps + "preferences.json")
 	var b f.BotType
@@ -117,7 +118,7 @@ func GetBotInfo() (f.BotType, error) {
 func AlertDiscord(s *dsg.Session, m *dsg.MessageCreate, err error) {
 	str := `<@` + m.Author.ID + `> | Error encountered, details as follows:
 	` + "\n```" + err.Error() + "```\n" + `
-	You are being pinged because your message was the message that triggered the
-	above error. Please inform the person running this bot or a sever admin.`
+You are being pinged because your message was the message that triggered the 
+above error. Please inform the person running this bot or a sever admin.`
 	s.ChannelMessageSend(m.ChannelID, str)
 }
