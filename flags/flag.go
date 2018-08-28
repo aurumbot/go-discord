@@ -17,9 +17,9 @@ const (
 // Fields:
 //  - Type: "-" or "--"
 //  - Name: Name of the flag.
-//      Ex: --name gabe miller --> Name = name
+//      Ex: --name gabe miller --> Name = "name"
 //  - Values: Single string of values after flag.
-//      Ex: --name gabe miller --> Values = gabe miller
+//      Ex: --name gabe miller --> Value = "gabe miller"
 //
 type Flag struct {
 	Type  Type
@@ -55,6 +55,12 @@ func Parse(args []string) []*Flag {
 		case arg[0] != '-':
 			if len(flags) > 0 {
 				flags[len(flags)-1].Value += arg + " "
+			} else {
+				cur = &Flag{
+					Type:  DoubleDash,
+					Name:  "unflagged",
+					Value: strings.Join(args, " "),
+				}
 			}
 		default:
 			dat.Log.Println("System recived flag that was not valid: \"" + arg + "\" .")
