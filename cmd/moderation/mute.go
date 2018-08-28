@@ -23,7 +23,7 @@ The actor must have the PermissionKickMembers perm to run this command.
 Usage: mute @user --duration 5 --reason spam`,
 		Action:  muteUser,
 		Perms:   dsg.PermissionKickMembers,
-		Version: "v1.0α",
+		Version: "v1.0-alpha",
 	}
 }
 

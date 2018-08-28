@@ -3,7 +3,6 @@ package dat
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/boltdb/bolt"
 	dsg "github.com/bwmarrin/discordgo"
 	f "github.com/whitman-colm/go-discord"
 	"io"
@@ -30,7 +29,7 @@ func init() {
 
 	currentTime = time.Now().Format("2006-01-02@15h04m")
 
-	file, err := os.Create(path + "logs" + ps + "botlogs@" + currentTime + ".log")
+	file, err := os.Create(path + "log" + ps + "botlogs@" + currentTime + ".log")
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +73,7 @@ func Save(fileName string, v interface{}) error {
 func Load(fileName string, v interface{}) error {
 	lock.Lock()
 	defer lock.Unlock()
-	file, err := os.Open(path + "cmds" + ps + fileName)
+	file, err := os.Open(path + "cfg" + ps + fileName)
 	if err != nil {
 		return err
 	}
