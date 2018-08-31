@@ -1,0 +1,29 @@
+{
+  "perms": {
+    "whitelistChannels": false,
+    "whitelistedChannels": [
+      "[put a channel ID (not a #channel) here]"
+    ],
+    "blacklistedChannels": [
+      "[put a channel ID (not a #channel) here]"
+    ]
+  },
+  "users": {
+    "roleWhitelist":false,
+    "reportPermissionFailures":false,
+    "blacklistedRoles": [
+      ""
+    ],
+    "adminRoles": [
+      "[put a role ID (not a @role) here]",
+      "This lets roles use all bot powers without having to give them real admin",
+      "permissions. Roles with ACTUAL admin perms don't have to be on this list"
+    ],
+    "staffRoles": [
+      ""
+    ],
+    "standardRoles": [
+      ""
+    ]
+  }
+}

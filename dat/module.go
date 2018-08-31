@@ -114,7 +114,7 @@ func GetBotInfo() (f.BotType, error) {
 * - m (type *discordgo.Message) : Needed for posting a message. Pings .Author.
 * - err (type error) : The error being reported
  */
-func AlertDiscord(s *dsg.Session, m *dsg.MessageCreate, err error) {
+func AlertDiscord(s *dsg.Session, m *dsg.Message, err error) {
 	str := `<@` + m.Author.ID + `> | Error encountered, details as follows:
 	` + "\n```" + err.Error() + "```\n" + `
 You are being pinged because your message was the message that triggered the 
