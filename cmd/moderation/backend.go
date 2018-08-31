@@ -62,7 +62,24 @@ func init() {
 	dat.Load("moderation"+ps+"config.json", &cfg)
 }
 
-func reverseAction(after time.Duration, b *bolt.Bucket, inf *incident) {
+// Un-mutes/un-bans user after a set period of time
+//
+// reverseAction reverses.... an action... after some time.. Self explanitory.
+// For actions such as temporary mutes and bans, this is the underlying logic
+// that undoes those things. It also removes their infraction from the data set
+// that tracks currently active infractions (for in case the bot goes down, the
+// punishment won't be forgotten about)
+//
+// Params:
+// after (time.Duration) How long the act should hang before reversed
+// inf   (*incident)	 The incedent to be reversed
+//
+// Returns:
+// error	This error has already been logged, this is just to
+//		send out to discord to inform of a failure
+//
+// NOTE: This removes the infraction from the Bucket "action"
+func reverseAction(after time.Duration, inf *incident) error {
 	time.Sleep(after)
 	switch inf.Action {
 	case 2: //mute
@@ -70,10 +87,22 @@ func reverseAction(after time.Duration, b *bolt.Bucket, inf *incident) {
 	case 4: //tempban
 		//unban & re-invite
 	default:
-		dat.Log.Println(errors.New(fmt.Sprintf("Cannot file Action ID %d (ID %s)",
+		dat.Log.Println(errors.New(fmt.Sprintf("Cannot file Action ID %d (INF ID %s)",
 			inf.Action, inf.ID)))
+		return err
 	}
 	if err := b.Delete([]byte(inf.ID)); err != nil {
 		dat.Log.Println(err)
+		return err
 	}
+	return nil
+}
+
+func setAsDecayed(after time.Duration, inf *incident) error {
+	time.Sleep(after)
+	if err := b.Delete([]byte(inf.ID)); err != nil {
+		dat.Log.Println(err)
+		return err
+	}
+	return nil
 }
