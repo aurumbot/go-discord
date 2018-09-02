@@ -41,30 +41,6 @@ func init() {
 		dat.Log.Println(err)
 		return
 	}
-
-	// Checks un-decayed infractions to see if any have decayed.
-	if err := db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucket([]byte("decay"))
-		if err != nil {
-			dat.Log.Println(err)
-			return err
-		}
-
-		if err := b.ForEach(func(k, v, []byte) error {
-			until, _ := time.Parse("2006-01-02@15:04:05", v.Until)
-			if now.After(until) {
-				return b.Remove([]byte(k))
-			}
-			return nil
-		}); err != nil {
-			dat.Log.Println(err)
-			return err
-		}
-	}); err != nil {
-		dat.Log.Println(err)
-		return
-	}
-
 }
 
 /* Logs Moderation Actions
@@ -73,6 +49,7 @@ func init() {
 * The function uses the following arguments:
 * - u string	: The user affected (ID)
 * - a string	: The person who used moderation action (ID)
+* - g string	: The guild of the infraction (ID)
 * - i .Time	: The time that the action was taken
 * - e .Duration	: The duration of the action to last
 * - w string	: The reason why the action was taken
@@ -86,9 +63,8 @@ func init() {
 * //TODO: Make decay times able to be changed in the config to be more
 *	  or less harsh.
  */
+/* NOTE: function redundant? try to remove by end.
 func createIncident(u string, a string, g string, i time.Time, e time.Duration, w string, p int) error {
-	var decay string
-
 	if w == "" {
 		w = "No reason was provided"
 	}
@@ -101,9 +77,9 @@ func createIncident(u string, a string, g string, i time.Time, e time.Duration, 
 		decay = eP.Add((((e ^ 2) ^ (1 / 3)) * 200))
 	} else {
 		decay = i.Add((((e ^ 2) ^ (1 / 3)) * 200))
-	}
+	}Decay is being put off until it doesn't suck.
 
-	infraction := incident{
+	return incident{
 		ID:     "", //TODO: figure out how to gen a unique id,
 		User:   u,
 		Issuer: a,
@@ -112,26 +88,37 @@ func createIncident(u string, a string, g string, i time.Time, e time.Duration, 
 		Until:  eP.Format("2006-01-02@15:04:05"),
 		Reason: w,
 		Action: p,
-		Decay:  decay.Format("2006-01-02@15:04:05"),
-	}
+		//Decay:  decay.Format("2006-01-02@15:04:05"),
+	}, nil
+}
+*/
 
-	// The incident has been generated, now to store in the database
+/* The thing that logs things to the database
+* log is a simple wrapper to save an infraction to the appropriate
+* bolt bucket(s).
+*
+* Parameters:
+* - inf incident{} : the incedent to be logged.
+*
+* Returns:
+* - _ error : an error, if it came up. The error has already
+*		been logged. This is just to pass to an AlertDiscord()
+*
+* TODO: Yeah just another reminder that when working on decay, a third bucket
+*	will be needed.
+ */
+func log(inf incident) error {
 	db, err := bolt.Open(moderation.db, 0666, &bolt.Options{Timeout: 1 * time.Second})
 	defer db.Close()
 
 	if err = db.Update(func(tx *bolt.Tx) error {
 		logs, err := tx.CreateBucket([]byte("logs"))
-		decay, err := tx.CreateBucket([]byte("decay"))
 		if err != nil {
 			return err
 		}
 
 		// Store values into the logs
-		if err := logs.Put([]byte(infraction.ID), []byte(infraction)); err != nil {
-			return err
-		}
-		// Store values into the decay list
-		if err := decay.Put([]byte(infraction.ID), []byte(infraction)); err != nil {
+		if err := logs.Put([]byte(inf.ID), []byte(inf)); err != nil {
 			return err
 		}
 

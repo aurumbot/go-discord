@@ -35,7 +35,9 @@ type incident struct {
 	Duration string `json:"duration"`
 	Reason   string `json:"reason"`
 	Action   int    `json:"action"`
-	Decay    string `json:"decay"`
+	// I can't figure out how to smartly do decay, so It'll be pushed
+	// back for the next couple versions.
+	//Decay    string `json:"decay"`
 }
 
 // Defined enum codes for each action a moderator can take.

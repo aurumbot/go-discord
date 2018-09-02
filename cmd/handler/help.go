@@ -63,6 +63,7 @@ func help(session *dsg.Session, message *dsg.MessageCreate) {
 	}
 }
 
+// TODO: Stop making repeat calls via HasPermissions
 func list(session *dsg.Session, message *dsg.MessageCreate) string {
 	t1 := time.Now()
 	msg := "**Available Commands:**"
@@ -90,5 +91,5 @@ func search(cmd *flags.Flag) string {
 			return help
 		}
 	}
-	return "Sorry, but I couldn't find a help page for that command."
+	return "A help page for that command couldn't be found."
 }

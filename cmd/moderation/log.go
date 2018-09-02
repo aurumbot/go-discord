@@ -11,9 +11,9 @@ import (
 
 // The config struct contains a horribly over-complex list of
 // channels and guilds where each trigger should be sent.
-// TODO: think this out, remember it needs to contain
-// guilds, channels, and triggers though not
-// necessarily in that order.
+// Each trigger is defined by a map[string][]string where each key
+// represents a guild (id) and each slice component is the ID of
+// a channel within that guild.
 type LogConfig struct {
 	Delete     map[string][]string `json:"delete"`
 	DeleteBulk map[string][]string `json:"deletebulk"`
@@ -33,6 +33,7 @@ func init() {
 // have already been established by the time I could shove it all in the init
 // function, so instead the main.go will shoot this off after the command
 // handler is established.
+// TODO: find a way to make it... not... do it like that
 func DefineLogHandlers(s *dsg.Session) {
 	s.AddHandler(logMessageDelete)
 	s.AddHandler(logMessageDeleteBulk)
@@ -45,8 +46,9 @@ func DefineLogHandlers(s *dsg.Session) {
 
 // Handles deleted messages
 func logMessageDelete(s *dsg.Session, m *dsg.MessageDelete) {
-	str := fmt.Sprintf("`[%s] Message deleted`",
-		getFormattedTime())
+
+	str := fmt.Sprintf("[%s] Message deleted\n```User     : %s\nChannel : %s\nContent : %s```",
+		getFormattedTime(), m.Message.Author.Mention(), s.Channel(m.Messaage.ChannelID))
 	guild, err := f.GetGuild(s, m.Message)
 	if err != nil {
 		dat.AlertDiscord(s, m, err)
