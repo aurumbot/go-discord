@@ -43,6 +43,14 @@ func init() {
 	}
 }
 
+/* Reloads the buckets from the primary "logs"
+*
+* TODO: Kill off active goroutines and relaunch them here.
+ */
+func reloadBuckets() err {
+	return nil
+}
+
 /* Logs Moderation Actions
 * Create Incident is a private function for use only in this package.
 * It handles creating logs and storing them in the databases.
@@ -112,30 +120,48 @@ func log(inf incident) error {
 	defer db.Close()
 
 	if err = db.Update(func(tx *bolt.Tx) error {
-		logs, err := tx.CreateBucket([]byte("logs"))
+		// Figures out if there is a "logs" bucket and
+		// stores values into it
+		logs, err := tx.CreateBucketIfNotExists([]byte("logs"))
 		if err != nil {
 			return err
 		}
-
-		// Store values into the logs
-		if err := logs.Put([]byte(inf.ID), []byte(inf)); err != nil {
+		if err = logs.Put([]byte(inf.ID), []byte(inf)); err != nil {
 			return err
 		}
 
-		if !false { // This should be a check to see if a timed mute/ban was enacted
+		// does the same thing above but for a bucket named after the user
+		// who had action taken on them.
+		logs, err = tx.CreateBucketIfNotExists([]byte(inf.User))
+		if err != nil {
+			return err
+		}
+		if err = logs.Put([]byte(inf.ID), []byte(inf)); err != nil {
+			return err
+		}
+
+		// does the same thing above above but for a bucket named after the guild
+		// this allows for "multi-server" logs.
+		logs, err = tx.CreateBucketIfNotExists([]byte(inf.Guild))
+		if err != nil {
+			return err
+		}
+		if err = logs.Put([]byte(inf.ID), []byte(inf)); err != nil {
+			return err
+		}
+
+		if inf.Action != 2|4 { // This should be a check to see if a timed mute/ban was enacted
 			return nil
 		}
 
 		// Store values into the active punishment list (timed mutes, tempbans)
-		active, err := tx.CreateBucket([]byte("active"))
+		logs, err = tx.CreateBucketIfNotExists([]byte("active"))
 		if err != nil {
 			return err
 		}
-		if err := active.Put([]byte(inf.ID), []byte(inf)); err != nil {
+		if err = logs.Put([]byte(inf.ID), []byte(inf)); err != nil {
 			return err
 		}
-		// Spawns off the goroutine to remove the punishment from the user.
-		go reverseAction(e, active, infraction)
 		return nil
 
 	}); err != nil {
