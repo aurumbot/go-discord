@@ -3,7 +3,7 @@
 echo "\033[1;33mBuilding for Windows ...\033[0m"
 GOOS=windows go build -o bin/windows/bot.exe cmd/alvisd/main.go
 
-echo "\033[1;33mBuilding for Mac (darwin) ...\033[0m"
+echo "\033[1;33mBuilding for Darwin ...\033[0m"
 GOOS=darwin go build -o bin/macos/bot cmd/alvisd/main.go
 
 echo "\033[1;33mBuilding for Linux ...\033[0m"
