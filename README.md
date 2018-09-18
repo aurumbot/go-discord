@@ -1,3 +1,11 @@
+# IMPORTANT:
+
+This project is left here to rot, both as a reference material to the author as a lot of this still needs to be implemented, and a testimant to his hubris. Do not even look in here. It is incomplete, undocumented, and will not compile.
+
+## The project is currently active [here](https://github.com/aurumbot/core).
+
+---
+
 # go-discord
 
 Discord Bots for The Rest of Us
